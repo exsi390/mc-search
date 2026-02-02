@@ -22,6 +22,7 @@ jubiler123:46.113.12.16
 kasajuda:91.192.199.34
 _pojutrze_:95.215.76.239
 KondonBojufkarz:31.60.99.3
+xxolek:135.125.156.89
 ejuho:91.206.154.37
 elojuzniehuzaka:176.98.119.164
 julkax7:89.64.69.230
@@ -1037,4 +1038,5 @@ juzio12369:91.222.127.136
 juhhukacper:78.30.65.8
 juliankwiatek:79.184.171.65
 kawery_bojuwkarz:46.205.214.164
+
 julkaziom2:85.221.146.218
