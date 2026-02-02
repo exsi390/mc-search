@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MC SEARCH - RESTRICTED ACCESS</title>
+    <style>
+        :root {
+            --primary-red: #ff0000;
+            --dark-red: #8b0000;
+            --bg-black: #0a0a0a;
+            --panel-bg: #151515;
+            --text-gray: #cccccc;
+        }
+
+        body { 
+            font-family: 'Courier New', Courier, monospace; 
+            background: var(--bg-black); 
+            color: white; 
+            text-align: center; 
+            padding: 40px 20px;
+            margin: 0;
+            background-image: radial-gradient(circle, #2b0000 0%, #0a0a0a 100%);
+        }
+
+        .container { 
+            max-width: 500px; 
+            margin: auto; 
+            background: var(--panel-bg); 
+            padding: 30px; 
+            border-radius: 4px; 
+            border: 1px solid var(--dark-red);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        h1 { 
+            color: var(--primary-red); 
+            text-transform: uppercase; 
+            letter-spacing: 3px; 
+            margin-bottom: 30px;
+            text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+        }
+
+        input { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 10px 0; 
+            background: #000; 
+            border: 1px solid #333; 
+            color: var(--primary-red); 
+            border-radius: 0; 
+            box-sizing: border-box;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: var(--primary-red);
+            box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+        }
+
+        button { 
+            width: 100%;
+            padding: 12px; 
+            cursor: pointer; 
+            background: var(--dark-red); 
+            color: white; 
+            border: none; 
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover { 
+            background: var(--primary-red); 
+            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+        }
+
+        #results { 
+            margin-top: 25px; 
+            text-align: left; 
+            background: rgba(0,0,0,0.8); 
+            padding: 15px; 
+            display: none; 
+            border-left: 3px solid var(--primary-red);
+            font-size: 0.9em;
+        }
+
+        .match { 
+            color: #ff4d4d; 
+            margin-bottom: 12px; 
+            border-bottom: 1px solid #222; 
+            padding-bottom: 8px; 
+            line-height: 1.5;
+        }
+
+        .match strong {
+            color: var(--primary-red);
+            text-transform: uppercase;
+            font-size: 0.8em;
+        }
+
+        /* Animacja migania dla efektu 'systemu' */
+        .blink {
+            animation: blinker 1.5s linear infinite;
+        }
+
+        @keyframes blinker {
+            50% { opacity: 0.5; }
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container" id="login-box">
+    <h1 class="blink">SYSTEM LOGIN</h1>
+    <input type="text" id="user" placeholder="USERNAME">
+    <input type="password" id="pass" placeholder="ACCESS_KEY">
+    <button onclick="login()">Authorize</button>
+</div>
+
+<div class="container" id="search-box" style="display:none;">
+    <h1>DATABASE SEARCH v1.3</h1>
+    <p style="color: #666; font-size: 0.8em; margin-bottom: 20px;">ACCESS GRANTED - SECURE CONNECTION ACTIVE</p>
+    <input type="text" id="nick" placeholder="Wpisz nick celu...">
+    <button onclick="search()">Execute Search</button>
+    <div id="results"></div>
+</div>
+
+<script>
+    const AUTH_FILE = 'login-haslo.txt';
+    const DB_FILES = ['popmc.txt', '4funrp.txt'];
+
+    async function login() {
+        const userVal = document.getElementById('user').value;
+        const passVal = document.getElementById('pass').value;
+
+        try {
+            const response = await fetch(AUTH_FILE);
+            const text = await response.text();
+            const lines = text.split('\n');
+
+            for (let line of lines) {
+                const [u, p] = line.trim().split(':');
+                if (u === userVal && p === passVal) {
+                    document.getElementById('login-box').style.display = 'none';
+                    document.getElementById('search-box').style.display = 'block';
+                    return;
+                }
+            }
+            alert("ACCESS DENIED: Invalid credentials.");
+        } catch (e) {
+            alert("CRITICAL ERROR: Could not reach auth server.");
+        }
+    }
+
+    async function search() {
+        const targetNick = document.getElementById('nick').value.toLowerCase().trim();
+        const resultsDiv = document.getElementById('results');
+        
+        if(!targetNick) return;
+
+        resultsDiv.innerHTML = "<span class='blink'>SCANNING DATABASES...</span>";
+        resultsDiv.style.display = 'block';
+        
+        let found = false;
+        let htmlOutput = "";
+
+        for (let fileName of DB_FILES) {
+            try {
+                const response = await fetch('Baza danych/' + fileName);
+                const text = await response.text();
+                const lines = text.split('\n');
+
+                for (let line of lines) {
+                    if (!line.trim()) continue;
+
+                    let nick, ip, uuid = null;
+
+                    if (line.includes(' - ')) {
+                        const parts = line.split(' - ');
+                        nick = parts[0].trim();
+                        ip = parts[1] ? parts[1].trim() : "N/A";
+                        uuid = parts[2] ? parts[2].trim() : null;
+                    } else if (line.includes(':')) {
+                        const parts = line.split(':');
+                        nick = parts[0].trim();
+                        ip = parts[1] ? parts[1].trim() : "N/A";
+                    }
+
+                    if (nick && nick.toLowerCase() === targetNick) {
+                        found = true;
+                        htmlOutput += `<div class="match">
+                            <strong>[DATABASE]:</strong> ${fileName}<br>
+                            <strong>[IP_ADDRESS]:</strong> ${ip}
+                            ${uuid ? `<br><strong>[UUID]:</strong> ${uuid}` : ''}
+                        </div>`;
+                    }
+                }
+            } catch (e) {
+                console.error("Read Error: " + fileName);
+            }
+        }
+
+        resultsDiv.innerHTML = found ? htmlOutput : "<span style='color: yellow;'>NO DATA FOUND IN ARCHIVES.</span>";
+    }
+</script>
+
+</body>
+</html>
