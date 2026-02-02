@@ -30,16 +30,33 @@
             padding: 30px; 
             border-radius: 4px; 
             border: 1px solid var(--dark-red);
-            box-shadow: 0 0 20px rgba(255, 0, 0, 0.2);
-            transition: all 0.3s ease;
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.15);
+        }
+
+        /* Styl kontenera logo i tytułu */
+        .header-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .logo-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 5px;
+            border: 1px solid var(--primary-red);
+            box-shadow: 0 0 10px var(--dark-red);
         }
 
         h1 { 
             color: var(--primary-red); 
             text-transform: uppercase; 
-            letter-spacing: 3px; 
-            margin-bottom: 30px;
+            letter-spacing: 2px; 
+            margin: 0;
             text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+            font-size: 1.8em;
         }
 
         input { 
@@ -49,15 +66,9 @@
             background: #000; 
             border: 1px solid #333; 
             color: var(--primary-red); 
-            border-radius: 0; 
             box-sizing: border-box;
             outline: none;
-            transition: border 0.3s;
-        }
-
-        input:focus {
-            border-color: var(--primary-red);
-            box-shadow: 0 0 5px rgba(255, 0, 0, 0.3);
+            border-radius: 0;
         }
 
         button { 
@@ -71,22 +82,22 @@
             font-weight: bold;
             letter-spacing: 2px;
             transition: 0.3s;
-            margin-top: 10px;
         }
 
         button:hover { 
             background: var(--primary-red); 
-            box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.6);
         }
 
         #results { 
             margin-top: 25px; 
             text-align: left; 
-            background: rgba(0,0,0,0.8); 
+            background: rgba(0,0,0,0.9); 
             padding: 15px; 
             display: none; 
             border-left: 3px solid var(--primary-red);
-            font-size: 0.9em;
+            max-height: 400px;
+            overflow-y: auto;
         }
 
         .match { 
@@ -94,46 +105,40 @@
             margin-bottom: 12px; 
             border-bottom: 1px solid #222; 
             padding-bottom: 8px; 
-            line-height: 1.5;
         }
 
-        .match strong {
-            color: var(--primary-red);
-            text-transform: uppercase;
-            font-size: 0.8em;
-        }
+        .blink { animation: blinker 1.5s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0.4; } }
 
-        /* Animacja migania dla efektu 'systemu' */
-        .blink {
-            animation: blinker 1.5s linear infinite;
-        }
-
-        @keyframes blinker {
-            50% { opacity: 0.5; }
-        }
-
+        p.status { color: #666; font-size: 0.8em; margin-bottom: 20px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div class="container" id="login-box">
-    <h1 class="blink">SYSTEM LOGIN</h1>
+    <div class="header-box">
+        <img src="https://i.pinimg.com/736x/33/ee/f5/33eef535b2ffa74da6a14c01834f2932.jpg" alt="Logo" class="logo-icon">
+        <h1 class="blink">SYSTEM LOGIN</h1>
+    </div>
     <input type="text" id="user" placeholder="USERNAME">
     <input type="password" id="pass" placeholder="ACCESS_KEY">
-    <button onclick="login()">Authorize</button>
+    <button onclick="login()">Authorize Access</button>
 </div>
 
 <div class="container" id="search-box" style="display:none;">
-    <h1>DATABASE SEARCH v1.3</h1>
-    <p style="color: #666; font-size: 0.8em; margin-bottom: 20px;">ACCESS GRANTED - SECURE CONNECTION ACTIVE</p>
-    <input type="text" id="nick" placeholder="Wpisz nick celu...">
-    <button onclick="search()">Execute Search</button>
+    <div class="header-box">
+        <img src="https://i.pinimg.com/736x/33/ee/f5/33eef535b2ffa74da6a14c01834f2932.jpg" alt="Logo" class="logo-icon">
+        <h1>MC SEARCH v1.5</h1>
+    </div>
+    <p class="status">ENCRYPTED CONNECTION ESTABLISHED</p>
+    <input type="text" id="nick" placeholder="Podaj nick celu...">
+    <button onclick="search()">Execute Database Scan</button>
     <div id="results"></div>
 </div>
 
 <script>
     const AUTH_FILE = 'login-haslo.txt';
-    const DB_FILES = ['popmc.txt', '4funrp.txt'];
+    const DB_FILES = ['popmc.txt', '4funrp.txt', 'papugamc.txt']; 
 
     async function login() {
         const userVal = document.getElementById('user').value;
@@ -152,9 +157,9 @@
                     return;
                 }
             }
-            alert("ACCESS DENIED: Invalid credentials.");
+            alert("ACCESS DENIED: Critical failure.");
         } catch (e) {
-            alert("CRITICAL ERROR: Could not reach auth server.");
+            alert("ERROR: System cannot find authorization file.");
         }
     }
 
@@ -164,7 +169,7 @@
         
         if(!targetNick) return;
 
-        resultsDiv.innerHTML = "<span class='blink'>SCANNING DATABASES...</span>";
+        resultsDiv.innerHTML = "<span class='blink' style='color:white'>PENETRATING DATABASES...</span>";
         resultsDiv.style.display = 'block';
         
         let found = false;
@@ -172,14 +177,16 @@
 
         for (let fileName of DB_FILES) {
             try {
-                const response = await fetch('Baza danych/' + fileName);
+                const response = await fetch(encodeURI('Baza danych/' + fileName));
+                if (!response.ok) continue;
+                
                 const text = await response.text();
                 const lines = text.split('\n');
 
                 for (let line of lines) {
                     if (!line.trim()) continue;
 
-                    let nick, ip, uuid = null;
+                    let nick = "", ip = "N/A", uuid = null;
 
                     if (line.includes(' - ')) {
                         const parts = line.split(' - ');
@@ -192,21 +199,21 @@
                         ip = parts[1] ? parts[1].trim() : "N/A";
                     }
 
-                    if (nick && nick.toLowerCase() === targetNick) {
+                    if (nick.toLowerCase() === targetNick) {
                         found = true;
                         htmlOutput += `<div class="match">
-                            <strong>[DATABASE]:</strong> ${fileName}<br>
-                            <strong>[IP_ADDRESS]:</strong> ${ip}
-                            ${uuid ? `<br><strong>[UUID]:</strong> ${uuid}` : ''}
+                            <strong style="color:var(--primary-red)">[SRC]:</strong> ${fileName}<br>
+                            <strong style="color:var(--primary-red)">[IP]:</strong> ${ip}
+                            ${uuid ? `<br><strong style="color:var(--primary-red)">[ID]:</strong> ${uuid}` : ''}
                         </div>`;
                     }
                 }
             } catch (e) {
-                console.error("Read Error: " + fileName);
+                console.error("Critical fail: " + fileName);
             }
         }
 
-        resultsDiv.innerHTML = found ? htmlOutput : "<span style='color: yellow;'>NO DATA FOUND IN ARCHIVES.</span>";
+        resultsDiv.innerHTML = found ? htmlOutput : "<span style='color: yellow;'>ZERO RESULTS FOUND IN ARCHIVES.</span>";
     }
 </script>
 
