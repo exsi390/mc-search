@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MC SEARCH - RESTRICTED ACCESS</title>
+    
+    <link rel="icon" type="image/jpeg" href="https://i.pinimg.com/736x/33/ee/f5/33eef535b2ffa74da6a14c01834f2932.jpg">
+
     <style>
         :root {
             --primary-red: #ff0000;
@@ -33,7 +36,6 @@
             box-shadow: 0 0 30px rgba(255, 0, 0, 0.15);
         }
 
-        /* Styl kontenera logo i tytułu */
         .header-box {
             display: flex;
             align-items: center;
@@ -68,7 +70,6 @@
             color: var(--primary-red); 
             box-sizing: border-box;
             outline: none;
-            border-radius: 0;
         }
 
         button { 
@@ -80,7 +81,6 @@
             border: none; 
             text-transform: uppercase;
             font-weight: bold;
-            letter-spacing: 2px;
             transition: 0.3s;
         }
 
@@ -96,8 +96,6 @@
             padding: 15px; 
             display: none; 
             border-left: 3px solid var(--primary-red);
-            max-height: 400px;
-            overflow-y: auto;
         }
 
         .match { 
@@ -109,8 +107,6 @@
 
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.4; } }
-
-        p.status { color: #666; font-size: 0.8em; margin-bottom: 20px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -122,33 +118,31 @@
     </div>
     <input type="text" id="user" placeholder="USERNAME">
     <input type="password" id="pass" placeholder="ACCESS_KEY">
-    <button onclick="login()">Authorize Access</button>
+    <button onclick="login()">Authorize</button>
 </div>
 
 <div class="container" id="search-box" style="display:none;">
     <div class="header-box">
         <img src="https://i.pinimg.com/736x/33/ee/f5/33eef535b2ffa74da6a14c01834f2932.jpg" alt="Logo" class="logo-icon">
-        <h1>MC SEARCH v1.5</h1>
+        <h1>MC SEARCH v1.6</h1>
     </div>
-    <p class="status">ENCRYPTED CONNECTION ESTABLISHED</p>
     <input type="text" id="nick" placeholder="Podaj nick celu...">
-    <button onclick="search()">Execute Database Scan</button>
+    <button onclick="search()">Execute Scan</button>
     <div id="results"></div>
 </div>
 
 <script>
+    // Logika skryptu pozostaje bez zmian
     const AUTH_FILE = 'login-haslo.txt';
     const DB_FILES = ['popmc.txt', '4funrp.txt', 'papugamc.txt']; 
 
     async function login() {
         const userVal = document.getElementById('user').value;
         const passVal = document.getElementById('pass').value;
-
         try {
             const response = await fetch(AUTH_FILE);
             const text = await response.text();
             const lines = text.split('\n');
-
             for (let line of lines) {
                 const [u, p] = line.trim().split(':');
                 if (u === userVal && p === passVal) {
@@ -157,37 +151,27 @@
                     return;
                 }
             }
-            alert("ACCESS DENIED: Critical failure.");
-        } catch (e) {
-            alert("ERROR: System cannot find authorization file.");
-        }
+            alert("ACCESS DENIED");
+        } catch (e) { alert("ERROR: AUTH_FILE MISSING"); }
     }
 
     async function search() {
         const targetNick = document.getElementById('nick').value.toLowerCase().trim();
         const resultsDiv = document.getElementById('results');
-        
         if(!targetNick) return;
-
-        resultsDiv.innerHTML = "<span class='blink' style='color:white'>PENETRATING DATABASES...</span>";
+        resultsDiv.innerHTML = "<span class='blink'>SCANNING...</span>";
         resultsDiv.style.display = 'block';
-        
         let found = false;
         let htmlOutput = "";
-
         for (let fileName of DB_FILES) {
             try {
                 const response = await fetch(encodeURI('Baza danych/' + fileName));
                 if (!response.ok) continue;
-                
                 const text = await response.text();
                 const lines = text.split('\n');
-
                 for (let line of lines) {
                     if (!line.trim()) continue;
-
                     let nick = "", ip = "N/A", uuid = null;
-
                     if (line.includes(' - ')) {
                         const parts = line.split(' - ');
                         nick = parts[0].trim();
@@ -198,22 +182,18 @@
                         nick = parts[0].trim();
                         ip = parts[1] ? parts[1].trim() : "N/A";
                     }
-
                     if (nick.toLowerCase() === targetNick) {
                         found = true;
                         htmlOutput += `<div class="match">
-                            <strong style="color:var(--primary-red)">[SRC]:</strong> ${fileName}<br>
-                            <strong style="color:var(--primary-red)">[IP]:</strong> ${ip}
-                            ${uuid ? `<br><strong style="color:var(--primary-red)">[ID]:</strong> ${uuid}` : ''}
+                            <strong>[DATABASE]:</strong> ${fileName}<br>
+                            <strong>[IP]:</strong> ${ip}
+                            ${uuid ? `<br><strong>[ID]:</strong> ${uuid}` : ''}
                         </div>`;
                     }
                 }
-            } catch (e) {
-                console.error("Critical fail: " + fileName);
-            }
+            } catch (e) {}
         }
-
-        resultsDiv.innerHTML = found ? htmlOutput : "<span style='color: yellow;'>ZERO RESULTS FOUND IN ARCHIVES.</span>";
+        resultsDiv.innerHTML = found ? htmlOutput : "NO RESULTS.";
     }
 </script>
 
