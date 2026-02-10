@@ -14,6 +14,7 @@
             --bg-black: #0a0a0a;
             --panel-bg: #151515;
             --text-gray: #cccccc;
+            --c2-blue: #00f2ff; /* Kolor akcentu dla C2Fabric */
         }
 
         body { 
@@ -24,6 +25,7 @@
             padding: 40px 20px;
             margin: 0;
             background-image: radial-gradient(circle, #2b0000 0%, #0a0a0a 100%);
+            min-height: 100vh;
         }
 
         .container { 
@@ -105,6 +107,19 @@
             padding-bottom: 8px; 
         }
 
+        /* Nowy element dla C2Fabric */
+        .c2-status {
+            margin-top: 20px;
+            font-size: 0.7em;
+            color: var(--text-gray);
+            border-top: 1px solid #333;
+            padding-top: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .c2-tag { color: var(--c2-blue); font-weight: bold; }
+
         .blink { animation: blinker 1.5s linear infinite; }
         @keyframes blinker { 50% { opacity: 0.4; } }
     </style>
@@ -119,6 +134,11 @@
     <input type="text" id="user" placeholder="USERNAME">
     <input type="password" id="pass" placeholder="ACCESS_KEY">
     <button onclick="login()">Authorize</button>
+    
+    <div class="c2-status">
+        <span>ENCRYPTION: AES-256</span>
+        <span>NODE: <span class="c2-tag">C2FABRIC-NET</span></span>
+    </div>
 </div>
 
 <div class="container" id="search-box" style="display:none;">
@@ -129,10 +149,14 @@
     <input type="text" id="nick" placeholder="Podaj nick celu...">
     <button onclick="search()">Execute Scan</button>
     <div id="results"></div>
+    
+    <div class="c2-status">
+        <span>CONNECTED TO <span class="c2-tag">C2FABRIC NETWORK</span></span>
+        <span class="blink">SECURE</span>
+    </div>
 </div>
 
 <script>
-    // Logika skryptu pozostaje bez zmian
     const AUTH_FILE = 'login-haslo.txt';
     const DB_FILES = ['popmc.txt', '4funrp.txt', 'papugamc.txt', 'sklejka.txt']; 
 
@@ -159,7 +183,7 @@
         const targetNick = document.getElementById('nick').value.toLowerCase().trim();
         const resultsDiv = document.getElementById('results');
         if(!targetNick) return;
-        resultsDiv.innerHTML = "<span class='blink'>SCANNING...</span>";
+        resultsDiv.innerHTML = "<span class='blink'>SCANNING C2FABRIC NODES...</span>";
         resultsDiv.style.display = 'block';
         let found = false;
         let htmlOutput = "";
@@ -188,15 +212,15 @@
                             <strong>[DATABASE]:</strong> ${fileName}<br>
                             <strong>[IP]:</strong> ${ip}
                             ${uuid ? `<br><strong>[ID]:</strong> ${uuid}` : ''}
+                            <br><small style="color:#00f2ff">Verified via C2Fabric Network</small>
                         </div>`;
                     }
                 }
             } catch (e) {}
         }
-        resultsDiv.innerHTML = found ? htmlOutput : "NO RESULTS.";
+        resultsDiv.innerHTML = found ? htmlOutput : "NO RESULTS IN C2FABRIC ARCHIVE.";
     }
 </script>
 
 </body>
 </html>
-
